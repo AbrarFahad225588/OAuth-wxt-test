@@ -161,6 +161,46 @@ zxxxFdyTel: 'input[type="text"][name="applyEx.zxxxFdyTel"]',
 //Email Address|
 zxxxFdyEmail: 'input[type="text"][name="applyEx.zxxxFdyEmail"]',
 
+
+//Employment Background
+
+// Do you have work experience? - Yes
+"haveWorkHistory_yes": 'input[type="radio"][name="haveWorkHistory"][value="1"]',
+
+// Do you have work experience? - No
+"haveWorkHistory_no": 'input[type="radio"][name="haveWorkHistory"][value="0"]',
+
+// Work History - Start Date (Year Attended From)
+"wh.startDate": 'input[type="text"][name="wh.startDate"]',
+
+// Work History - End Date (Year Attended To)
+"wh.endDate": 'input[type="text"][name="wh.endDate"]',
+
+// Work History - Company
+"wh.workPlace": 'input[type="text"][name="wh.workPlace"]',
+
+// Work History - Job Title
+"wh.career": 'input[type="text"][name="wh.career"]',
+
+
+// Add button
+"addWorkHistory": 'input[type="button"][value="Add"]',
+
+// Have you ever worked in China? - Yes
+"haveWorkedInChina_yes": 'input[type="radio"][name="applyEx.haveWorkedInChina"][value="1"]',
+
+// Have you ever worked in China? - No
+"haveWorkedInChina_no": 'input[type="radio"][name="applyEx.haveWorkedInChina"][value="0"]',
+
+// Name of the Institution (worked in China)
+"workingInstitutionName": 'input[type="text"][name="applyEx.workingInstitutionName"]',
+
+// Employment Start Date (worked in China)
+"workingStartDate": 'input[type="text"][name="applyEx.workingStartDate"]',
+
+// Employment End Date (worked in China)
+"workingEndDate": 'input[type="text"][name="applyEx.workingEndDate"]',
+
 // save and next 
 saveAndNextButton: 'input[type="button"][value="Save and Next"]',
 // saveAndNextButton: 'input[type="button"].el-button.el-button--primary[value="Save and Next"]',

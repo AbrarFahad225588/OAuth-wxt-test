@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>家庭成员信息管理</title>
+    <!-- 模拟常用UI框架样式 (纯净版, 无外部依赖, 仅实现布局与基础视觉) -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 24px;
+        }
+        /* 容器模拟原系统样式 */
+        .FamilyMemberInformationNew {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .FamilyMemberInformation {
+            padding: 20px 24px 32px;
+        }
+        /* 栅格布局: 仿col-xs-12 / col-sm-6 */
+        .form {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -12px;
+        }
+        .form-item-left, .form-item-right {
+            flex: 0 0 100%;
+            padding: 0 12px;
+        }
+        @media (min-width: 768px) {
+            .form-item-left, .form-item-right {
+                flex: 0 0 50%;
+            }
+        }
+        .row {
+            margin-bottom: 1.25rem;
+        }
+        .row.cl:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #1f2f3a;
+        }
+        .formControls {
+            width: 100%;
+        }
+        .input-text, .select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+            background-color: #fff;
+            font-family: inherit;
+        }
+        .input-text:focus, .select:focus {
+            outline: none;
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 2px rgba(44,125,160,0.2);
+        }
+        /* 红色边框表示必填未填时的视觉提示(原内联样式保留) */
+        .input-text[style*="border: 1px solid red"] {
+            border-color: #e53e3e !important;
+        }
+        .size-S {
+            font-size: 14px;
+        }
+        .hide {
+            display: none !important;
+        }
+        .flex-spacebetween {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .flex-spacebetween .select {
+            flex: 2;
+        }
+        .flex-spacebetween .input-text {
+            flex: 1;
+        }
+        .mt-30 {
+            margin-top: 30px;
+        }
+        .mb-50 {
+            margin-bottom: 50px;
+        }
+        .text-c {
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            background: none;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background-color: #2c7da0;
+            border-color: #2c7da0;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1f5e7a;
+            border-color: #1f5e7a;
+        }
+        .btn-primary-outline {
+            border-color: #2c7da0;
+            color: #2c7da0;
+            background: white;
+        }
+        .btn-primary-outline:hover {
+            background-color: #eaf4f8;
+        }
+        .radius {
+            border-radius: 30px;
+        }
+        .size-X {
+            padding: 8px 28px;
+        }
+        .upname-search-box {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        /* 提示小字 */
+        .error-tip {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        hr {
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="FamilyMemberInformationNew">
+    <!-- 模拟服务器端隐藏域: value="3" 表示类型为家庭成员 -->
+    <input type="hidden" id="txtType" class="input-text size-S hide" value="3">
+    <div class="FamilyMemberInformation">
+        <input type="hidden" id="txtFid" class="input-text size-S hide" value="">
+        
+        <div class="col-xs-12 form">
+            <!-- 左侧区域 -->
+            <div class="col-sm-6 form-item-left">
+                <div class="row cl">
+                    <label class="form-label col-sm-12">姓名 Name<span style="color: red;">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <input id="txtname" runat="server" data-must="1" class="input-text size-S" placeholder="Name" autocomplete="off" style="border: 1px solid red;">
+                        <div class="upname-search-box hide" style="margin-top: 0px !important;width:60%;"></div>
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-sm-12">单位名称 Work Place<span style="color: red;" class="bitian">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <input id="txtemployer" runat="server" class="input-text size-S" value="" placeholder="Name of Institute/Employer">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-sm-12">职业 Occupation<span style="color: red;" class="bitian">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <select class="select select-Occupation">
+                            <option value="请选择  Please Choose">请选择  Please Choose</option>
+                            <option value="1">职员 Clerk</option>
+                            <option value="2">学生 Student</option>
+                            <option value="3">教师 Teacher</option>
+                            <option value="4">医生 Doctor</option>
+                            <option value="5">工人 Worker</option>
+                            <option value="6">军人 Soldier</option>
+                            <option value="7">工程师 Engineer</option>
+                            <option value="8">学者 Scholar</option>
+                            <option value="9">家庭主妇 Housewife</option>
+                            <option value="10">退休 Retirement</option>
+                            <option value="11">经理 Manager</option>
+                            <option value="12">政府公务人员 Civil Servants</option>
+                            <option value="13">农民 Farmer</option>
+                            <option value="15">警察 Policemen</option>
+                            <option value="16">牧民 Herders</option>
+                            <option value="17">记者 Journalist</option>
+                            <option value="14">其他 Other</option>
+                        </select>
+                    </div>
+                    <div class="formControls col-sm-6" style="margin-top: 8px;">
+                        <input id="txtOccupationOthers" class="input-text size-S hide" placeholder="pls write details" data-vali="0" data-min="1" data-msg="职业信息不能为空! <br /> The Occupation cannot be empty" value="">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-sm-12">邮箱 Email：<span style="color: red;" class="bitian">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <input id="ContactEmail" class="input-text size-S FormVailBlur" placeholder="Contact Email" data-email="1" value="" data-must="1" onkeyup="value=value.replace(/\s/g,'')" style="border: 1px solid red;">
+                    </div>
+                </div>
+            </div>
+            <!-- 右侧区域 -->
+            <div class="col-sm-6 form-item-right">
+                <div class="row cl">
+                    <label class="form-label col-sm-12">关系 Relationship with the student<span style="color: red;">*</span></label>
+                    <div class="formControls col-sm-12 flex-spacebetween">
+                        <select class="select select-Family" data-must="1" style="border: 1px solid rgb(221, 221, 221);">
+                            <option value="0">无 None</option>
+                            <option value="1">父亲 Father</option>
+                            <option value="2">母亲 Mother</option>
+                            <option value="3">配偶 Spouse</option>
+                            <option value="4">叔伯 Uncle</option>
+                            <option value="5">兄弟 Brother</option>
+                            <option value="6">姐妹 Sister</option>
+                            <option value="7">子女 Children</option>
+                            <option value="9">老师 Teacher</option>
+                            <option value="10">雇主 Employer</option>
+                            <option value="8">其他 Others</option>
+                        </select>
+                        <input type="text" class="MemberOther input-text size-S hide" id="txtMemberOther" value="" placeholder="请填写具体关系">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-sm-12">行业类型 Industry Type<span style="color: red;" class="bitian">*</span></label>
+                    <div class="formControls col-sm-6">
+                        <select class="select select-CompanyType">
+                            <option value="请选择  Please Choose">请选择  Please Choose</option>
+                            <option value="0">无 None</option>
+                            <option value="1">政府机构 Government and Public Administration</option>
+                            <option value="2">教育 Education and Training</option>
+                            <option value="3">金融保险 Financial/Insurance Services</option>
+                            <option value="4">通信 Communications</option>
+                            <option value="5">计算机服务业 Information Technology and Computers</option>
+                            <option value="6">医药 Healthcare and Health Sciences</option>
+                            <option value="7">科学研究 Research Insititute</option>
+                            <option value="8">制造业 Manufacturing</option>
+                            <option value="9">建筑房地产 Construction/Real Estate</option>
+                            <option value="10">文娱 Sports and Recreation</option>
+                            <option value="11">住宿餐饮 Hospitality</option>
+                            <option value="12">农林牧渔 Agriculture</option>
+                            <option value="13">社会工作 Community-based Organization</option>
+                            <option value="14">批发零售 Wholesale/Retail Services</option>
+                            <option value="16">交通运输 Transportation</option>
+                            <option value="15">其它 Others</option>
+                        </select>
+                    </div>
+                    <div class="formControls col-sm-6">
+                        <input id="txtCompanyTypeOther" class="input-text size-S" placeholder="CompanyType" data-vali="1" data-min="1" data-msg="行业类型信息不能为空! <br /> The work_CompanyType cannot be empty！" value="">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-sm-12">电话 Phone or Mobile<span style="color: red;" class="bitian">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <input id="txtContactTel" class="input-text size-S FormVailBlur" placeholder="Contact Tel" data-phone="1" onkeyup="value=value.replace(/[^\0-9\@.\@-\@+]/g,'')" value="">
+                    </div>
+                </div>
+                <div class="row cl hide">
+                    <label class="form-label col-sm-12">职务 Position<span class="bitian" style="color: red;">*</span></label>
+                    <div class="formControls col-sm-12">
+                        <input id="txtduties" class="input-text size-S" placeholder="Position" value="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-c mt-30 mb-50">
+            <a class="btn btn-primary radius btn_conceal size-X" id="btn_FamilyMemberInformation">保存 Save</a>
+            <a id="FamilyMemberInformation_Cancel" class="btn btn-primary-outline radius">关闭 Close</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 获取DOM元素
+        const txtname = document.getElementById('txtname');
+        const txtemployer = document.getElementById('txtemployer');
+        const occupationSelect = document.querySelector('.select-Occupation');
+        const occupationOtherInput = document.getElementById('txtOccupationOthers');
+        const emailInput = document.getElementById('ContactEmail');
+        const relationSelect = document.querySelector('.select-Family');
+        const relationOtherInput = document.getElementById('txtMemberOther');
+        const companyTypeSelect = document.querySelector('.select-CompanyType');
+        const companyOtherInput = document.getElementById('txtCompanyTypeOther');
+        const contactTel = document.getElementById('txtContactTel');
+        const saveBtn = document.getElementById('btn_FamilyMemberInformation');
+        const cancelBtn = document.getElementById('FamilyMemberInformation_Cancel');
+        const txtFid = document.getElementById('txtFid');     // 隐藏id，可用于编辑模式
+        
+        // 辅助函数: 显示/隐藏职业“其他”输入框
+        function toggleOccupationOther() {
+            const selectedVal = occupationSelect.value;
+            if (selectedVal === '14') { // 其他 Other
+                occupationOtherInput.classList.remove('hide');
+                occupationOtherInput.setAttribute('data-vali', '1');
+                occupationOtherInput.required = true;
+            } else {
+                occupationOtherInput.classList.add('hide');
+                occupationOtherInput.value = '';
+                occupationOtherInput.setAttribute('data-vali', '0');
+                occupationOtherInput.required = false;
+            }
+        }
+        
+        // 关系如果是“其他 Others” (value='8') 则显示自定义输入框
+        function toggleRelationOther() {
+            if (relationSelect.value === '8') {
+                relationOtherInput.classList.remove('hide');
+            } else {
+                relationOtherInput.classList.add('hide');
+                relationOtherInput.value = '';
+            }
+        }
+        
+        // 行业类型如果是“其它 Others” (value='15') 则显示具体输入框
+        function toggleCompanyOther() {
+            if (companyTypeSelect.value === '15') {
+                companyOtherInput.classList.remove('hide');
+                // 可选增加必填验证，但依照原有逻辑, 保留动态必填标志
+                companyOtherInput.setAttribute('data-must', '1');
+            } else {
+                companyOtherInput.classList.add('hide');
+                companyOtherInput.value = '';
+                companyOtherInput.setAttribute('data-must', '0');
+            }
+        }
+        
+        // 通用去除首尾空格
+        function trimValues() {
+            txtname.value = txtname.value.trim();
+            txtemployer.value = txtemployer.value.trim();
+            emailInput.value = emailInput.value.trim();
+            contactTel.value = contactTel.value.trim();
+            if (occupationOtherInput && !occupationOtherInput.classList.contains('hide')) {
+                occupationOtherInput.value = occupationOtherInput.value.trim();
+            }
+            if (relationOtherInput && !relationOtherInput.classList.contains('hide')) {
+                relationOtherInput.value = relationOtherInput.value.trim();
+            }
+            if (companyOtherInput && !companyOtherInput.classList.contains('hide')) {
+                companyOtherInput.value = companyOtherInput.value.trim();
+            }
+        }
+        
+        // 校验函数
+        function validateForm() {
+            let isValid = true;
+            // 1. 姓名 (必填)
+            if (!txtname.value) {
+                highlightError(txtname, '姓名不能为空 / Name is required');
+                isValid = false;
+            } else {
+                clearError(txtname);
+            }
+            
+            // 2. 单位名称 (必填)
+            if (!txtemployer.value) {
+                highlightError(txtemployer, '单位名称不能为空 / Work Place is required');
+                isValid = false;
+            } else {
+                clearError(txtemployer);
+            }
+            
+            // 3. 职业: 下拉不能为默认"请选择"
+            if (!occupationSelect.value || occupationSelect.value === '请选择  Please Choose') {
+                highlightError(occupationSelect, '请选择职业 / Please select occupation');
+                isValid = false;
+            } else {
+                clearError(occupationSelect);
+                // 若职业为其他，需检查其他职业详情
+                if (occupationSelect.value === '14') {
+                    if (!occupationOtherInput.value.trim()) {
+                        highlightError(occupationOtherInput, '请填写具体职业 / Please specify occupation');
+                        isValid = false;
+                    } else {
+                        clearError(occupationOtherInput);
+                    }
+                }
+            }
+            
+            // 4. 邮箱 (必填且邮箱格式)
+            const email = emailInput.value;
+            const emailPattern = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+            if (!email) {
+                highlightError(emailInput, '邮箱不能为空 / Email is required');
+                isValid = false;
+            } else if (!emailPattern.test(email)) {
+                highlightError(emailInput, '请输入有效的邮箱地址 / Please enter valid email');
+                isValid = false;
+            } else {
+                clearError(emailInput);
+            }
+            
+            // 5. 关系 (必填且不能为0“无”，除无外? 业务一般需要实际关系，但保留可根据需要自定义)
+            if (!relationSelect.value || relationSelect.value === '0') {
+                highlightError(relationSelect, '请选择与学生关系 / Relationship is required');
+                isValid = false;
+            } else {
+                clearError(relationSelect);
+                if (relationSelect.value === '8' && !relationOtherInput.value.trim()) {
+                    highlightError(relationOtherInput, '请填写具体关系 / Please specify relationship');
+                    isValid = false;
+                } else {
+                    clearError(relationOtherInput);
+                }
+            }
+            
+            // 6. 行业类型 (必填，并且不能是默认“请选择”)
+            const compType = companyTypeSelect.value;
+            if (!compType || compType === '请选择  Please Choose') {
+                highlightError(companyTypeSelect, '请选择行业类型 / Industry Type is required');
+                isValid = false;
+            } else {
+                clearError(companyTypeSelect);
+                if (compType === '15') {  // 其它 Others
+                    if (!companyOtherInput.value.trim()) {
+                        highlightError(companyOtherInput, '请填写具体行业类型 / Please specify industry type');
+                        isValid = false;
+                    } else {
+                        clearError(companyOtherInput);
+                    }
+                }
+            }
+            
+            // 7. 电话 (必填且符合基本规则，简单手机/电话校验)
+            const phone = contactTel.value;
+            if (!phone) {
+                highlightError(contactTel, '电话不能为空 / Phone is required');
+                isValid = false;
+            } else if (!/^[\+\d\-\s\(\)]{5,20}$/.test(phone.replace(/\s/g,''))) {
+                // 宽松国际格式
+                highlightError(contactTel, '请输入有效电话号码 / Please enter valid phone number');
+                isValid = false;
+            } else {
+                clearError(contactTel);
+            }
+            
+            return isValid;
+        }
+        
+        // 高亮错误: 添加红框和错误提示
+        function highlightError(elem, msg) {
+            if (!elem) return;
+            elem.style.border = '1px solid #e53e3e';
+            // 寻找或创建错误提示span
+            let parent = elem.parentElement;
+            let errSpan = parent.querySelector('.error-tip');
+            if (!errSpan) {
+                errSpan = document.createElement('div');
+                errSpan.className = 'error-tip';
+                parent.appendChild(errSpan);
+            }
+            errSpan.innerText = msg;
+            elem.addEventListener('input', function onInput() {
+                clearError(elem);
+                elem.removeEventListener('input', onInput);
+            }, { once: true });
+        }
+        
+        function clearError(elem) {
+            if (!elem) return;
+            elem.style.border = '';
+            // 恢复默认边框，如果有原始样式内联?
+            if (elem.id === 'txtname' || elem.id === 'ContactEmail') {
+                // 保留原来红色初始样式？清除后重置为默认灰色，如果校验通过不再标红
+                elem.style.border = '1px solid #d0d7de';
+            } else {
+                elem.style.border = '';
+            }
+            const parent = elem.parentElement;
+            if (parent) {
+                const errSpan = parent.querySelector('.error-tip');
+                if (errSpan) errSpan.remove();
+            }
+        }
+        
+        // 保存按钮逻辑
+        function onSave() {
+            trimValues();
+            if (!validateForm()) {
+                // 滚动到第一个错误处
+                const firstError = document.querySelector('.error-tip');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // 收集数据
+            const formData = {
+                fid: txtFid.value || null,
+                type: document.getElementById('txtType').value,
+                name: txtname.value,
+                employer: txtemployer.value,
+                occupation: occupationSelect.options[occupationSelect.selectedIndex]?.text || occupationSelect.value,
+                occupationCode: occupationSelect.value,
+                occupationOther: occupationSelect.value === '14' ? occupationOtherInput.value : '',
+                email: emailInput.value,
+                relationship: relationSelect.options[relationSelect.selectedIndex]?.text || relationSelect.value,
+                relationshipCode: relationSelect.value,
+                relationshipOther: relationSelect.value === '8' ? relationOtherInput.value : '',
+                industryType: companyTypeSelect.options[companyTypeSelect.selectedIndex]?.text || companyTypeSelect.value,
+                industryTypeCode: companyTypeSelect.value,
+                industryOther: companyTypeSelect.value === '15' ? companyOtherInput.value : '',
+                phone: contactTel.value,
+                duties: document.getElementById('txtduties')?.value || ''
+            };
+            
+            console.log('保存的家庭成员信息:', formData);
+            alert('保存成功! (演示模式)\n' + JSON.stringify(formData, null, 2));
+            // 实际场景可以提交至后端: fetch('/api/saveFamilyMember', { method: 'POST', body: JSON.stringify(formData) })
+        }
+        
+        function onCancel() {
+            // 关闭/重置表单 (演示: 清空数据或隐藏弹窗)
+            if (confirm('确定关闭吗？未保存的数据将丢失。')) {
+                // 重置表单所有字段
+                txtname.value = '';
+                txtemployer.value = '';
+                occupationSelect.value = '请选择  Please Choose';
+                occupationOtherInput.value = '';
+                occupationOtherInput.classList.add('hide');
+                emailInput.value = '';
+                relationSelect.value = '0';
+                relationOtherInput.value = '';
+                relationOtherInput.classList.add('hide');
+                companyTypeSelect.value = '请选择  Please Choose';
+                companyOtherInput.value = '';
+                companyOtherInput.classList.add('hide');
+                contactTel.value = '';
+                // 清除所有错误样式
+                document.querySelectorAll('.input-text, .select').forEach(el => {
+                    clearError(el);
+                });
+                // 重置姓名和邮箱红色初始边框? 依样画葫芦设置初始提示边框
+                txtname.style.border = '1px solid red';
+                emailInput.style.border = '1px solid red';
+                alert('表单已关闭/重置');
+                // 若在实际dialog中可关闭窗口，这里演示仅重置
+            }
+        }
+        
+        // 绑定监听事件: 职业、关系、行业类型的动态显示其他输入框
+        occupationSelect.addEventListener('change', toggleOccupationOther);
+        relationSelect.addEventListener('change', toggleRelationOther);
+        companyTypeSelect.addEventListener('change', toggleCompanyOther);
+        
+        // 初始化调用一次确保隐藏域状态正确
+        toggleOccupationOther();
+        toggleRelationOther();
+        toggleCompanyOther();
+        
+        // 手动初始化一些样式 (原有姓名/邮箱红色边框保留，但为了校验正常，无需额外)
+        // 添加保存和关闭事件
+        saveBtn.addEventListener('click', onSave);
+        cancelBtn.addEventListener('click', onCancel);
+        
+        // 附加: 实时清除邮箱和姓名初始红色边框（当用户开始输入时移除红色边框强化体验）
+        [txtname, emailInput].forEach(field => {
+            field.addEventListener('input', function() {
+                if (field.value.trim() !== '') {
+                    field.style.border = '1px solid #d0d7de';
+                    clearError(field);
+                } else {
+                    // 保留为空时仍然红色提醒风格，但不清除也行
+                    if (field.id === 'txtname' && !field.value) field.style.border = '1px solid red';
+                    if (field.id === 'ContactEmail' && !field.value) field.style.border = '1px solid red';
+                }
+            });
+        });
+        
+        // 模拟已有示例数据填充 (演示编辑效果, 若有fid值则载入)
+        // 可选: 如果url中有参数或者预置演示数据
+        const demoMode = true;
+        if (demoMode && !txtFid.value) {
+            // 展示示例数据方便测试 (注释可取消)
+            // txtname.value = '张三';
+            // txtemployer.value = '北京大学';
+            // occupationSelect.value = '2';
+            // emailInput.value = 'zhangsan@example.com';
+            // relationSelect.value = '1';
+            // companyTypeSelect.value = '2';
+            // contactTel.value = '+86 13800138000';
+            // 触发一下动态显隐
+            // toggleOccupationOther(); toggleRelationOther(); toggleCompanyOther();
+        }
+    })();
+</script>
+</body>
+</html>
